@@ -1,45 +1,176 @@
-Overview
-========
+# 🚀 AstroETL: Automating NASA Data Pipelines with Airflow
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+A complete end-to-end ETL pipeline that extracts daily data from NASA's **Astronomy Picture of the Day (APOD)** API, transforms it, and loads it into a PostgreSQL database — fully automated using **Apache Airflow (Astro Runtime)**.
 
-Project Contents
-================
+---
 
-Your Astro project contains the following files and folders:
+## 📊 Table of Contents
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes one example DAG:
-    - `example_astronauts`: This DAG shows a simple ETL pipeline example that queries the list of astronauts currently in space from the Open Notify API and prints a statement for each astronaut. The DAG uses the TaskFlow API to define tasks in Python, and dynamic task mapping to dynamically print a statement for each astronaut. For more on how this DAG works, see our [Getting started tutorial](https://www.astronomer.io/docs/learn/get-started-with-airflow).
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+- [Project Overview](#project-overview)
+- [Tech Stack](#tech-stack)
+- [Architecture Diagram](#architecture-diagram)
+- [Setup Instructions](#setup-instructions)
+- [Airflow Configuration](#airflow-configuration)
+- [Postgres Database Table](#postgres-database-table)
+- [Pipeline Flow](#pipeline-flow)
+- [Future Improvements](#future-improvements)
+- [Demo Screenshot](#demo-screenshot)
+- [License](#license)
 
-Deploy Your Project Locally
-===========================
+---
 
-Start Airflow on your local machine by running 'astro dev start'.
+## 🌟 Project Overview
 
-This command will spin up five Docker containers on your machine, each for a different Airflow component:
+This project demonstrates a real-world data engineering workflow:
 
-- Postgres: Airflow's Metadata Database
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- DAG Processor: The Airflow component responsible for parsing DAGs
-- API Server: The Airflow component responsible for serving the Airflow UI and API
-- Triggerer: The Airflow component responsible for triggering deferred tasks
+- Connects with NASA’s public **Astronomy Picture of the Day (APOD)** API.
+- Extracts image metadata and descriptions.
+- Transforms raw API response into structured data.
+- Loads data into PostgreSQL database.
+- Fully orchestrated & scheduled using Apache Airflow (Astro Runtime).
 
-When all five containers are ready the command will open the browser to the Airflow UI at http://localhost:8080/. You should also be able to access your Postgres Database at 'localhost:5432/postgres' with username 'postgres' and password 'postgres'.
+---
 
-Note: If you already have either of the above ports allocated, you can either [stop your existing Docker containers or change the port](https://www.astronomer.io/docs/astro/cli/troubleshoot-locally#ports-are-not-available-for-my-local-airflow-webserver).
+## 🛠 Tech Stack
 
-Deploy Your Project to Astronomer
-=================================
+| Tool           | Purpose                       |
+| -------------- | ----------------------------- |
+| Apache Airflow | Workflow orchestration        |
+| Astro Runtime  | Simplified Airflow deployment |
+| Python         | Core programming language     |
+| PostgreSQL     | Data storage                  |
+| NASA APOD API  | Public data source            |
+| Docker         | Containerization              |
+| DBeaver        | DB management & validation    |
 
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://www.astronomer.io/docs/astro/deploy-code/
+---
 
-Contact
-=======
+## 🛠 Architecture Diagram
 
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
+```mermaid
+flowchart LR
+    NASA_API[NASA APOD API] --> Airflow_ETL[Airflow DAG]
+    Airflow_ETL --> PostgresDB[PostgreSQL Database]
+    PostgresDB --> DBeaver[Data Validation via DBeaver]
+```
+
+---
+
+## 🚀 Setup Instructions
+
+### 1⃣ Clone the repository
+
+```bash
+git clone https://github.com/your-username/AstroETL-Automating-NASA-Data-Pipelines-with-Airflow.git
+cd AstroETL-Automating-NASA-Data-Pipelines-with-Airflow
+```
+
+### 2⃣ Initialize Astro Runtime (Airflow)
+
+```bash
+astro dev init
+```
+
+### 3⃣ Install Astro CLI (if not installed)
+
+```bash
+brew install astro
+# or follow https://docs.astronomer.io/astro/install-cli
+```
+
+### 4⃣ Start Airflow locally
+
+```bash
+astro dev start
+```
+
+### 5⃣ Access Airflow UI
+
+Navigate to: [http://localhost:8080](http://localhost:8080)
+
+Default credentials:
+
+- Username: `admin`
+- Password: `admin`
+
+---
+
+## ⚙ Airflow Configuration
+
+#### 1⃣ Add NASA API Connection
+
+- **Connection ID:** `nasa_api`
+- **Connection Type:** `HTTP`
+- **Host:** `https://api.nasa.gov/`
+- **Extras:**
+
+```json
+{"api_key": "YOUR_NASA_API_KEY"}
+```
+
+#### 2⃣ Add Postgres Connection
+
+- **Connection ID:** `my_postgres_connection`
+- **Connection Type:** `Postgres`
+- **Host:** `postgres`
+- **Schema:** `postgres`
+- **Login:** `postgres`
+- **Password:** `postgres`
+- **Port:** `5432`
+
+---
+
+## 📄 PostgreSQL Database Table
+
+The pipeline creates a table named `apod_data` with:
+
+| Column      | Type               |
+| ----------- | ------------------ |
+| id          | SERIAL PRIMARY KEY |
+| title       | VARCHAR(255)       |
+| explanation | TEXT               |
+| url         | TEXT               |
+| date        | DATE               |
+| media\_type | VARCHAR(50)        |
+
+---
+
+## 🔄 Pipeline Flow
+
+1⃣ **Extract:**\
+Fetch data from NASA APOD API using `SimpleHttpOperator`.
+
+2⃣ **Transform:**\
+Clean & filter required fields using `PythonTask`.
+
+3⃣ **Load:**\
+Insert data into PostgreSQL using `PostgresHook`.
+
+---
+
+## 🔧 Future Improvements
+
+- Add error handling and retries.
+- Store images locally or on cloud storage.
+- Build data quality checks.
+- Add email or Slack alerts on DAG failures.
+- Extend to multiple NASA APIs.
+
+---
+
+## 📸 Demo Screenshot
+
+*Airflow DAG Screenshot here (add once working)*
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## ✨ Credits
+
+Made with ❤️ by Sadab Ali.
+
