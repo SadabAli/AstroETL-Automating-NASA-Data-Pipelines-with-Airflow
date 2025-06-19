@@ -160,7 +160,7 @@ Insert data into PostgreSQL using `PostgresHook`.
 
 ## 📸 Demo Screenshot
 
-*Airflow DAG Screenshot here (add once working)*
+
 ![Screenshot 2025-06-19 080830](https://github.com/user-attachments/assets/ca9173a6-961e-4e66-a1b0-9ac80f22e0fd)
 ![Screenshot 2025-06-19 081150](https://github.com/user-attachments/assets/449d6502-e78f-4710-b537-efab11255406)
 
