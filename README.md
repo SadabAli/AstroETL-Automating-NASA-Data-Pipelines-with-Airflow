@@ -49,9 +49,9 @@ This project demonstrates a real-world data engineering workflow:
 
 ```mermaid
 flowchart LR
-    NASA_API[NASA APOD API] --> Airflow_ETL[Airflow DAG]
-    Airflow_ETL --> PostgresDB[PostgreSQL Database]
-    PostgresDB --> DBeaver[Data Validation via DBeaver]
+    NASA_API[Create_table] --> Airflow_ETL[extract_apod]
+    Airflow_ETL --> PostgresDB[transform_apod_data]
+    PostgresDB --> DBeaver[load_data_to_postgres]
 ```
 
 ---
